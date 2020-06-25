@@ -7,6 +7,16 @@ road = {
 }
 
 
+road = {
+    1: ((2, 50), (3, 45), (4, 10)),
+    2: ((4, 15), (3, 10)),
+    3: ((5, 30),),
+    4: ((1,10), (5, 15),),
+    5: ((2, 20),),
+    6: ((5,3),)
+}
+
+
 class Route:
     def __init__(self, start):
         self.start = start
@@ -18,9 +28,6 @@ class Route:
         new_one = Route(self.start)
         new_one.end = self.end
         new_one.cost = self.cost
-        # python 2
-        # new_one.path = []
-        # new_one.path.extend(self.path)
         new_one.path = self.path.copy()
         return new_one
 
@@ -51,8 +58,9 @@ s = 1
 e = 6
 routes = {Route(s)}
 found = False
+del_set = set()
+
 while not found:
-    del_set = set()
     add_set = set()
     sorted_routs = sort_set(routes)
     previous_route_cost = float('inf')
@@ -63,8 +71,10 @@ while not found:
         del_set.add(r)
         edges = road[r.end]
         for edge in edges:
+            if edge[0] in r.path:
+                continue
             r1 = r.move_forward(edge)
-            r0 = find_route(r1.start, r1.end, routes)
+            r0 = find_route(r1.start, r1.end, routes.union(del_set))
             if not r0:
                 add_set.add(r1)
             elif r0.cost > r1.cost:
@@ -73,7 +83,9 @@ while not found:
 
     routes.difference_update(del_set)
     routes.update(add_set)
-
+    if len(routes) == 0:
+        print("no way")
+        exit()
     found = all({r.end == e for r in routes}) and len({r.cost for r in routes}) == 1
 print(len(routes))
 print(routes.pop())

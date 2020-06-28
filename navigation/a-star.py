@@ -6,15 +6,33 @@
 #     5: ((4, 2), (6, 5)),
 # }
 
+#
+# road = {
+#     1: ((2, 50), (3, 45),(4,10)),
+#     2: ((4, 15), (3, 10)),
+#     3: ((5, 30),),
+#     4: ((1,10), (5, 15),),
+#     5: ((2, 20), (3,35)),
+#     6: ((5,3),)
+# }
+
 
 road = {
-    1: ((2, 50), (3, 45),(4,10)),
-    2: ((4, 15), (3, 10)),
-    3: ((5, 30),),
-    4: ((1,10), (5, 15),),
-    5: ((2, 20), (3,35)),
-    6: ((5,3),)
+    "S": (("A", 7), ("B", 2), ("C", 3)),
+    "A": (("S", 7), ("B", 3), ("D", 4)),
+    "B": (("S", 2), ("A",3),("D", 4),("H", 1)),
+    "D": (("A", 4), ("B", 4), ("F", 5)),
+    "F": (("D", 5), ("H", 3)),
+    "H": (("B", 1), ("G", 2),),
+    "G": (("H", 2), ("E", 2),),
+    "C": (("S", 3), ("L", 2),),
+    "L": (("C", 2), ("I", 4), ("J", 4)),
+    "I": (("L", 4), ("J", 6), ("K", 4)),
+    "J": (("L", 4), ("I", 6), ("K", 4)),
+    "K": (("I", 4), ("J", 4), ("E", 5)),
+    "E": (("K", 5), ("G", 2),),
 }
+
 
 class Route:
     def __init__(self, start):
@@ -24,7 +42,8 @@ class Route:
         self.cost = 0
 
     def __str__(self):
-        return "cost: {}, path: {}".format(self.cost, self.path)
+        # return "cost: {}, path: {}".format(self.cost, self.path)
+        return "cost: {}, path: {}".format(self.huristic_cost(), self.path)
 
     def _move_forward(self, _edge):
         _r = Route(self.start)
@@ -46,6 +65,23 @@ class Route:
         iterated_points.add(self.end)
         return _new_routes
 
+    def huristic_cost(self):
+        h_c = { "S-E": 10,
+                "A-E": 9,
+                "B-E": 7,
+                "C-E": 8,
+                "D-E": 8,
+                "F-E": 6,
+                "H-E": 6,
+                "G-E": 3,
+                "I-E": 4,
+                "L-E": 6,
+                "J-E": 4,
+                "K-E": 3,
+                "E-E": 0,
+        }
+        return self.cost + h_c["{}-{}".format(self.end, "E")]
+
 
 def find_route(start, end, routs):
     for rout in routs:
@@ -59,7 +95,8 @@ def relax(new_routes, routes):
         r0 = find_route(_r.start, _r.end, routes)
         if not r0:
             routes.add(_r)
-        elif r0.cost > _r.cost:
+        # elif r0.cost > _r.cost:
+        elif r0.huristic_cost() > _r.huristic_cost():
             print("{} has been replaced by {} during relaxation".format(r0, _r))
             routes.remove(r0)
             routes.add(_r)
@@ -72,24 +109,27 @@ def get_edges(_road, start_point):
 
 
 def main():
-    s = 1
-    e = 6
+    s = "S"
+    e = "E"
     r = Route(s)
     routes = {r}
     iterated_points = set()
     is_over = False
+    round_num = 0
 
     while not is_over:
         new_routes = r.move_forward(get_edges(road, r.end), iterated_points)
         routes.remove(r)
         relax(new_routes, routes)
         if len(routes) > 0:
-            r = min(routes, key=lambda x: x.cost)
+            # r = min(routes, key=lambda x: x.cost)
+            r = min(routes, key=lambda x: x.huristic_cost())
         is_over = len(routes) == 0 or e == r.end
 
         print("\n".join([str(sr) for sr in routes]))
-        print("-------------")
-
+        round_num += 1
+        print("------ {} -------".format(round_num))
+        
 
 if __name__ == '__main__':
     main()

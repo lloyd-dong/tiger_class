@@ -16,6 +16,7 @@ road = {
     6: ((5,3),)
 }
 
+
 class Route:
     def __init__(self, start):
         self.start = start

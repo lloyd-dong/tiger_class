@@ -12,3 +12,10 @@ cdf = np.around(np.cumsum(pdf),3)
 print("sum: {}, data: {}".format(sum(data),data))
 print("pdf: {}".format(pdf))
 print("cdf: {}%".format(cdf))
+
+
+import matplotlib.pyplot as plt
+# plt.plot(range(0, len(data)),data)
+plt.plot(range(0, len(data)),pdf)
+plt.plot(range(0, len(data)),cdf)
+plt.show()

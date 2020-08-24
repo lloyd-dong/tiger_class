@@ -19,7 +19,7 @@ for i in range(count):
 
 
 # how many times are correct in one round
-criteria = 5
+criteria = 4
 correct = 0
 for rs in results:	
 	sum_ = sum(rs)	

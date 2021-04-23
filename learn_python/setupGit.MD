@@ -9,3 +9,5 @@ gernal steps:
 2. git clone 
 3. move your code into it
 4. git add, commit, push, pull
+5. git clone git@github.com:lloyd-dong/tiger_class.git
+6. follow each other

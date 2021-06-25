@@ -1,14 +1,21 @@
-import math
-from Config import INIT_SPEED, MAP_SCOPE
+from math import cos, sin, sqrt
+from Config import INIT_SPEED, MAP_SCOPE, RADIUS_ALIGNMENT, ANGLE_DIRECTION
+import numpy as np
+from numpy.random import default_rng
 
 class Vector:
     def __init__(self, x, y):
         self.x = x
         self.y = y
 
+    def update_direction(self, degree):
+        theta = np.deg2rad(degree)
+        rot = np.array([[cos(theta), -sin(theta)], [sin(theta), cos(theta)]])
+        self.x, self.y = np.dot(rot, [self.x, self.y])
+
     def distance(self, another_one):
-        return math.sqrt( min((self.x - another_one.x) ** 2, (MAP_SCOPE - abs(self.x - another_one.x))**2 )
-                          + min((self.y - another_one.y) **2, (MAP_SCOPE - abs(self.y - another_one.y))**2 ))
+        return sqrt(min((self.x - another_one.x) ** 2, (MAP_SCOPE - abs(self.x - another_one.x))**2)
+                          + min((self.y - another_one.y) **2, (MAP_SCOPE - abs(self.y - another_one.y))**2))
 
     def move(self, speed, delta_t: float) -> None: # speed is also a vector
         self.x = (self.x + speed.x * delta_t) % MAP_SCOPE  # periodic boundary
@@ -28,8 +35,8 @@ class Animal:
         self.speed = kwargs.get("speed", INIT_SPEED)  # this is a vector
         self.shape = kwargs.get("shape", "v")  # the marker to plot, e.g. wolf 'D', sheep '+'
 
-    def distance(self, other_animal  ):
-        return self.pos.distance( other_animal.pos )
+    def distance(self, other_animal):
+        return self.pos.distance(other_animal.pos)
 
     def calculate_align_pulse(self, herd : [], force_0: Vector) -> Vector:
         nearby_herd = [ h for h in herd if self.distance(h) <= R_ALIGHNMENT ]
@@ -64,15 +71,18 @@ class Animal:
                 force.inverse()
         return force
 
+    def update_speed_alignment(self):
+        nearby_herd = get_alignment_animals(self, RADIUS_ALIGNMENT)
+        self.speed.x = np.mean([h.speed.x for h in nearby_herd])
+        self.speed.y = np.mean([h.speed.y for h in nearby_herd])
+        self.speed.update_direction(ANGLE_DIRECTION * default_rng().uniform(-1.0, 1))
+
     def update_speed(self, delta_t):
-        force = self.calculate_force( Wolves, Vector(0,0))
-        force = self.calculate_force( alive_animals( Sheep), force)
-        gaussian = np.random.normal(0,1,2)
-        # del_t for force and gaussian are different
-        self.speed.x = self.speed.x + force.x * delta_t + gaussian[0] * delta_t
-        self.speed.y = self.speed.y + force.y * delta_t + gaussian[1] * delta_t
+        self.update_speed_alignment(delta_t)
+        self.update_speed_repel(delta_t)
+        # self.update_speed_chase(delta_t)
         pass
 
-    def move(self, delta_t : float ):
+    def move(self, delta_t: float):
         self.update_speed(delta_t)
         self.pos.move(self.speed, delta_t)

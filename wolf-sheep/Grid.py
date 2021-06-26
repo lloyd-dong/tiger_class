@@ -1,3 +1,5 @@
+import math
+
 from scipy import spatial
 import numpy as np
 import Animal
@@ -16,13 +18,13 @@ class Grid:
     def __init__(self, grid_size =1, max_scope = 10):
         self._grid_size = grid_size
         self._max_scope = max_scope
-        self._row = int(max_scope/grid_size)
+        self._row = math.ceil(max_scope * 1.0 / grid_size)
         self._col = self._row
         last_gap = max_scope % grid_size
-        is_last_row_close_to_border = 0 < last_gap < grid_size / 2
+        self.is_last_row_close_to_border = 0 < last_gap < grid_size / 2.0
 
         x, y = np.mgrid[0:(self._row), 0:(self._col)]
-        self._KDTree = spatial.KDTree(list(zip(x.ravel(), y.ravel())))
+        self._KDTree = spatial.KDTree(list(zip(x.ravel() * grid_size, y.ravel() * grid_size)))
         self._grid_data = self._KDTree.data
 
     def update_pos(self, sheep_pos):
@@ -46,12 +48,25 @@ class Grid:
                 new_r = (r + self._row + i_r) % self._row
                 new_c = (c + self._col + i_c) % self._col
                 nearby_points.add(new_c * self._row + new_r)
-                if self.is_last_row_close_to_border:
-                    if c == 0 or c == self._col - 1:
-                        new_c = 1
-                    if r == 0 or r == self._row - 1:
-                        new_r = 1
-                    nearby_points.add(new_c * self._row + new_r)
+
+        if self.is_last_row_close_to_border:
+            if c == 0:
+                new_c = self._col - 2
+            elif c == self._col - 1:
+                new_c = 1
+            for i in range(-1, 2):
+                temp_r = (r + self._row + i) % self._row
+                nearby_points.add(new_c * self._row + temp_r)
+
+            if r == 0:
+                new_r = self._row - 2
+            elif r == self._row - 1:
+                new_r = 1
+            for i in range(-1, 2):
+                temp_c = (c + self._col + i) % self._col
+                nearby_points.add(temp_c * self._row + new_r)
+
+            nearby_points.add(new_c * self._row + new_r)
 
         return c * self._row + r, nearby_points
 

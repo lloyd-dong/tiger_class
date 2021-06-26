@@ -67,13 +67,17 @@ class Animal:
             return self.calculate_align_pulse( herd, force_0)
         else:
             force = self.calculate_chase_escape( herd, force_0)
-            if ( self.name == "sheep" ):
+            if (self.name == "sheep"):
                 force.inverse()
         return force
 
-    def set_alignment_points(self, idx, array_shape):
+    def set_alignment_points(self, idx, nearby: set):
+        """
+
+        :type nearby: set
+        """
         self.closest_alignment = idx
-        self.nearby_alignments = 
+        self.nearby_alignments = nearby
 
     def update_speed_alignment(self):
         nearby_herd = get_alignment_animals(self, RADIUS_ALIGNMENT)

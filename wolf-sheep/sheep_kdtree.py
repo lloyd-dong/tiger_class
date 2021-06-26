@@ -31,9 +31,8 @@ if __name__ == "__main__":
         alignment_grid.update_pos([(s.pos.x, s.pos.y) for s in sheep])
         for idx, s in enumerate(sheep):
             closest_point, nearby_points = alignment_grid.get_closest_and_nearby(s.pos, idx)
-            s.alignment_point = closest_point
-            s.alignment_nearby = nearby_points
-            sheep_around[closest_point] = sheep_around.get(closest_point, set()).add(s.id)
+            s.set_alignment_points(closest_point, nearby_points)
+            sheep_around[closest_point] = sheep_around.get(closest_point, set()).add(s)
 
         for s in sheep:
             s.move(Config.DELTA_T, sheep_around)

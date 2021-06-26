@@ -71,16 +71,22 @@ class Animal:
                 force.inverse()
         return force
 
-    def set_alignment_points(self, idx, nearby: set):
+    def set_alignment_points(self, idx: int, nearby: set):
         """
 
-        :type nearby: set
+        :param idx: int
+        :type nearby: set of idx of alignment grid
         """
         self.closest_alignment = idx
         self.nearby_alignments = nearby
 
-    def update_speed_alignment(self):
-        nearby_herd = get_alignment_animals(self, RADIUS_ALIGNMENT)
+    def update_speed_alignment(self, delta_t):
+        sheep_around = {}
+        raw_nearby_herd = set()
+        for idx in self.nearby_alignments:
+            raw_nearby_herd.add(sheep_around.get(idx, None))
+        nearby_herd = [h for h in raw_nearby_herd if self.square_distance(h) < RADIUS_ALIGNMENT_SQUARE ]
+
         self.speed.x = np.mean([h.speed.x for h in nearby_herd])
         self.speed.y = np.mean([h.speed.y for h in nearby_herd])
         self.speed.update_direction(ANGLE_DIRECTION * default_rng().uniform(-1.0, 1))

@@ -11,32 +11,29 @@ from Grid import Grid
 
 Sheep = []
 Wolves = []
-Animals = []
+
 
 def init():
-    global alignment_tree
-
+    global alignment_grid
     util.init_animals(Sheep, Wolves)
-    Animals.extend(Sheep)
-    Animals.extend(Wolves)
-
-    alignment_tree = Grid(Config.RADIUS_ALIGNMENT, Config.MAP_SCOPE)
+    alignment_grid = Grid(Config.RADIUS_ALIGNMENT, Config.MAP_SCOPE)
 
 
 if __name__ == "__main__":
     init()
-    sheep_around_point = {}
+    sheep_around = {}
 
     for i in range(100):
         sheep = util.alive_animals(Sheep)
         if i % 10 == 0:
             util.draw(sheep)
-        sheep_pos = np.array( [(s.pos.x, s.pos.y) for s in sheep])
-        nearby_points = alignment_tree.query(sheep_pos)[1]
+
+        alignment_grid.update_pos(sheep)
         for idx, s in enumerate(sheep):
-            s.set_alignment_points(nearby_points[idx])
-            s._get_nearby_points(nearby_points[idx]) => array of 9 points
-            sheep_around_point[nearby_points[idx]] = sheep_around_point.get(nearby_points[i], set()).add(s.id)
+            closest_point, nearby_points = alignment_grid.get_closest_and_nearby(s.pos, idx)
+            s.alignment_point = closest_point
+            s.alignment_nearby = nearby_points
+            sheep_around[closest_point] = sheep_around.get(closest_point, set()).add(s.id)
 
         for s in sheep:
-            s.move(Config.DELTA_T, sheep_around_point)
+            s.move(Config.DELTA_T, sheep_around)

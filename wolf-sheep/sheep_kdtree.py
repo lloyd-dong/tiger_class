@@ -4,31 +4,39 @@
 # sheep can't overlap
 # move with updated kdtree to check if overlap
 
+import util
+import Config
 import numpy as np
-from numpy.random import default_rng
-from Animal import Animal, Vector
-from Config import N, MAP_SCOPE, INIT_SPEED, RADIUS_REPEL, MAX_ITERATION, DELTA_T
-from until import draw, alive_animals
+from Grid import Grid
 
 Sheep = []
-
+Wolves = []
+Animals = []
 
 def init():
-    rnd = default_rng()
-    positions = [Vector(p[0], p[1]) for p in
-                 zip(rnd.choice(int(MAP_SCOPE / RADIUS_REPEL), size=2 * N, replace=False) * RADIUS_REPEL,
-                     rnd.uniform(0, MAP_SCOPE, 2 * N))]
-    speed = [Vector(p[0], p[1]) for p in zip(np.random.randint(0, INIT_SPEED, N),
-                                             np.random.randint(0, INIT_SPEED, N))]
-    for i in range(N):
-        Sheep.append(Animal("sheep", i, pos=positions[i], speed=speed[i], shape="+"))
-        # Wolves.append(Animal("wolf", N + i, pos=positions[N + i], speed=speed[i], shape="D"))
+    global alignment_tree
+
+    util.init_animals(Sheep, Wolves)
+    Animals.extend(Sheep)
+    Animals.extend(Wolves)
+
+    alignment_tree = Grid(Config.RADIUS_ALIGNMENT, Config.MAP_SCOPE)
 
 
 if __name__ == "__main__":
     init()
+    sheep_around_point = {}
+
     for i in range(100):
+        sheep = util.alive_animals(Sheep)
         if i % 10 == 0:
-            draw(Sheep)
-        for s in alive_animals(Sheep):
-            s.move(DELTA_T)
+            util.draw(sheep)
+        sheep_pos = np.array( [(s.pos.x, s.pos.y) for s in sheep])
+        nearby_points = alignment_tree.query(sheep_pos)[1]
+        for idx, s in enumerate(sheep):
+            s.set_alignment_points(nearby_points[idx])
+            s._get_nearby_points(nearby_points[idx]) => array of 9 points
+            sheep_around_point[nearby_points[idx]] = sheep_around_point.get(nearby_points[i], set()).add(s.id)
+
+        for s in sheep:
+            s.move(Config.DELTA_T, sheep_around_point)

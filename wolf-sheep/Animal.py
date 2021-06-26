@@ -71,6 +71,10 @@ class Animal:
                 force.inverse()
         return force
 
+    def set_alignment_points(self, idx, array_shape):
+        self.closest_alignment = idx
+        self.nearby_alignments = 
+
     def update_speed_alignment(self):
         nearby_herd = get_alignment_animals(self, RADIUS_ALIGNMENT)
         self.speed.x = np.mean([h.speed.x for h in nearby_herd])

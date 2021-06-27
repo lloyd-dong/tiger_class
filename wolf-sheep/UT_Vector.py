@@ -1,12 +1,13 @@
 import unittest
-from Animal import Vector
+from Vector import Vector
+import Config
 
 
 class MyTestCase(unittest.TestCase):
     def test_distance_in_periodic_map(self):
         self.assertEqual(5, Vector(0, 3).distance(Vector(4, 0)))
-        v1 = Vector(1, 1)
-        v2 = Vector(MAX_SCOPE - 2, MAX_SCOPE - 3)
+        v1 = Vector(1, 1, Config.MAP_SCOPE)
+        v2 = Vector(Config.MAP_SCOPE - 2, Config.MAP_SCOPE - 3, Config.MAP_SCOPE)
         self.assertEqual(5, v1.distance(v2))
 
         # w1 = Animal("wolf", 1, pos= Vector(10,10), speed = Vector(3,1))

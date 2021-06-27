@@ -1,3 +1,5 @@
+from typing import Dict
+
 N = 10
 MAP_SCOPE = 1000
 INIT_SPEED = 10
@@ -10,3 +12,5 @@ RADIUS_SIGHT = 80
 ANGLE_DIRECTION = 20
 DELTA_T = 1  # set as 1 for debugging, normally should be 0.01 or less
 MAX_ITERATION = 10000
+
+Sheep_Around: Dict[int, set] = {}

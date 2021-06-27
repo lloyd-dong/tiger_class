@@ -7,14 +7,13 @@ import time
 
 import util
 import Config
-from Grid import Grid
+import Animal
 
 Sheep = []
 Wolves = []
 
 
 def init():
-    global alignment_grid
     util.init_animals(Sheep, Wolves)
     util.init_alignment_grid()
 
@@ -32,7 +31,7 @@ def main():
         for s in sheep:
             s.move(Config.DELTA_T)
         util.Sheep_Around = {}
-        util.Distance_Map = {}
+        Animal.Distance_Map = {}
 
 
 if __name__ == "__main__":

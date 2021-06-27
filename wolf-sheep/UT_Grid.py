@@ -1,7 +1,7 @@
 import unittest
 from Grid import Grid
 import numpy as np
-from Animal import Vector
+from Vector import Vector
 
 
 class GridTestCase(unittest.TestCase):

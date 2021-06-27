@@ -2,7 +2,7 @@ import math
 
 from scipy import spatial
 import numpy as np
-import Animal
+from Vector import Vector
 
 
 class Grid:
@@ -31,7 +31,7 @@ class Grid:
         nearby = self._KDTree.query(sheep_pos)
         self.nearby_points = nearby[1]
 
-    def get_closest_and_nearby(self, pos: Animal.Vector, sheep_idx):
+    def get_closest_and_nearby(self, pos: Vector, sheep_idx):
         idx = self.nearby_points[sheep_idx]
         # idx = c * self._row + r because [0,0], [0,1]
         r = idx % self._row

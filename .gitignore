@@ -46,5 +46,5 @@ Temporary Items
 .idea
 
 venv/ 
-
+*.log
 __pycache__

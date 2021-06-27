@@ -23,9 +23,9 @@ def main():
 
     for i in range(100):
         sheep = util.alive_animals(Sheep)
-        if i % 10 == 0:
+        if i % 4 == 0:
             util.draw(sheep)
-            time.sleep(2)
+            time.sleep(1)
 
         util.update_alignment(sheep)
         for s in sheep:

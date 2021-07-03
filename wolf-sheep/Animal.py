@@ -38,14 +38,18 @@ class Animal:
         self.nearby_alignments = nearby
 
     def update_speed_alignment(self):
+        rnd = default_rng()
+        logger.info(f"{self.id} speed 0 is {self.speed.x **2 + self.speed.y**2 }, {self.speed.x}, {self.speed.y}")
         raw_nearby_herd = set()
         for idx in self.nearby_alignments:
             raw_nearby_herd = set.union(raw_nearby_herd, Config.Sheep_Around.get(idx, set()))
         nearby_herd_speed = [[h.speed.x, h.speed.y] for h in raw_nearby_herd
                              if self.square_distance(h) <= Config.RADIUS_ALIGNMENT_SQUARE]
 
-        self.speed.x, self.speed.y = np.mean(nearby_herd_speed, axis=0)
-        self.speed.change_direction(Config.ANGLE_DIRECTION * default_rng().uniform(-1.0, 1))
+        self.speed.x, self.speed.y = np.mean(nearby_herd_speed, axis=0) + rnd.uniform(-1,1, 2)
+        logger.info(f"{self.id} speed 1 is {self.speed.x **2 + self.speed.y**2 }, {self.speed.x}, {self.speed.y}")
+        self.speed.change_direction(Config.ANGLE_DIRECTION * rnd.uniform(-1.0, 1))
+        logger.info(f"{self.id} speed 2 is {self.speed.x **2 + self.speed.y **2}, {self.speed.x}, {self.speed.y}")
 
     def update_speed(self, delta_t):
         self.update_speed_alignment()
@@ -55,7 +59,7 @@ class Animal:
     def move(self, delta_t: float):
         self.update_speed(delta_t)
         self.pos.move(self.speed, delta_t)
-        logger.info(f"{self.id} moved to {self.pos.x}, {self.pos.y}")
+        # logger.info(f"{self.id} moved to {self.pos.x}, {self.pos.y}")
 
     # def calculate_align_pulse(self, herd : [], force_0: Vector) -> Vector:
     #     nearby_herd = [ h for h in herd if self.distance(h) <= R_ALIGHNMENT ]

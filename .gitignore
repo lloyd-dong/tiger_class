@@ -47,4 +47,5 @@ Temporary Items
 
 venv/ 
 *.log
+*.log.*
 __pycache__

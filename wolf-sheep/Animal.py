@@ -39,17 +39,14 @@ class Animal:
 
     def update_speed_alignment(self):
         rnd = default_rng()
-        logger.info(f"{self.id} speed 0 is {self.speed.x **2 + self.speed.y**2 }, {self.speed.x}, {self.speed.y}")
+        logger.info(f"{self.id} speed 0 is  {self.speed.y}")
         raw_nearby_herd = set()
         for idx in self.nearby_alignments:
             raw_nearby_herd = set.union(raw_nearby_herd, Config.Sheep_Around.get(idx, set()))
-        nearby_herd_speed = [[h.speed.x, h.speed.y] for h in raw_nearby_herd
+        nearby_herd_speed_direction = [h.speed.y for h in raw_nearby_herd
                              if self.square_distance(h) <= Config.RADIUS_ALIGNMENT_SQUARE]
-
-        self.speed.x, self.speed.y = np.mean(nearby_herd_speed, axis=0) + rnd.uniform(-1,1, 2)
-        logger.info(f"{self.id} speed 1 is {self.speed.x **2 + self.speed.y**2 }, {self.speed.x}, {self.speed.y}")
-        self.speed.change_direction(Config.ANGLE_DIRECTION * rnd.uniform(-1.0, 1))
-        logger.info(f"{self.id} speed 2 is {self.speed.x **2 + self.speed.y **2}, {self.speed.x}, {self.speed.y}")
+        self.speed.y = np.mean(nearby_herd_speed_direction) + Config.ANGLE_DIRECTION * rnd.uniform(-1.0, 1)
+        logger.info(f"{self.id} speed 0 is  {self.speed.y}")
 
     def update_speed(self, delta_t):
         self.update_speed_alignment()

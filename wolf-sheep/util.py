@@ -1,3 +1,5 @@
+import math
+
 import matplotlib.pyplot as plt
 from numpy.random import default_rng
 from Animal import Animal
@@ -16,8 +18,7 @@ def init_animals(sheep, wolves):
                  zip(rnd.choice(int(Config.MAP_SCOPE/3 / Config.RADIUS_REPEL), size=2 * Config.N, replace=False)
                      * Config.RADIUS_REPEL,
                      rnd.uniform(0, Config.MAP_SCOPE/3, 2 * Config.N))]
-    speed = [Vector(p[0], p[1]) for p in zip(rnd.uniform(0, Config.INIT_SPEED, 2 * Config.N),
-                                             rnd.uniform(0, Config.INIT_SPEED, 2 * Config.N))]
+    speed = [Vector(Config.INIT_SPEED, p) for p in rnd.uniform(0, 2 * math.pi, 2 * Config.N)]
     for i in range(Config.N):
         sheep.append(Animal("sheep", i, pos=positions[i], speed=speed[i], shape="+"))
         # wolves.append(Animal("wolf", N + i, pos=positions[N + i], speed=speed[N + i], shape="D"))

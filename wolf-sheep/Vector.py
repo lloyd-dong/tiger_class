@@ -24,5 +24,7 @@ class Vector:
         return sqrt(self.square_distance(another_one))
 
     def move(self, speed, delta_t: float) -> None:  # speed is also a vector
-        self.x = (self.x + speed.x * delta_t) % self.max_scope  # periodic boundary
-        self.y = (self.y + speed.y * delta_t) % self.max_scope  # periodic boundary
+        # self.x = (self.x + speed.x * delta_t) % self.max_scope  # periodic boundary
+        # self.y = (self.y + speed.y * delta_t) % self.max_scope  # periodic boundary
+        self.x = (self.x + speed.x * sin(speed.y) * delta_t) % self.max_scope  # periodic boundary
+        self.y = (self.y + speed.y * cos(speed.y) * delta_t) % self.max_scope  # periodic boundary

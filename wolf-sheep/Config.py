@@ -1,6 +1,6 @@
 from typing import Dict
 
-N = 30
+N = 10
 MAP_SCOPE = 1000
 INIT_SPEED = 10
 RADIUS_ALIGNMENT = 50

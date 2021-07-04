@@ -15,9 +15,9 @@ def alive_animals(animals: []) -> []:
 def init_animals(sheep, wolves):
     rnd = default_rng()
     positions = [Vector(p[0], p[1]) for p in
-                 zip(rnd.choice(int(Config.MAP_SCOPE/3 / Config.RADIUS_REPEL), size=2 * Config.N, replace=False)
+                 zip(rnd.choice(int(Config.MAP_SCOPE/ Config.RADIUS_REPEL), size=2 * Config.N, replace=False)
                      * Config.RADIUS_REPEL,
-                     rnd.uniform(0, Config.MAP_SCOPE/3, 2 * Config.N))]
+                     rnd.uniform(0, Config.MAP_SCOPE, 2 * Config.N))]
     speed = [Vector(Config.INIT_SPEED, p) for p in rnd.uniform(0, 2 * math.pi, 2 * Config.N)]
     for i in range(Config.N):
         sheep.append(Animal("sheep", i, pos=positions[i], speed=speed[i], shape="+"))

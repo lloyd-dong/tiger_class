@@ -1,13 +1,16 @@
 import Config
 import numpy as np
 from numpy.random import default_rng
-import util
 from Logger import logger
+import math
 
 Distance_Map = {}
 
 
 class Animal:
+    closest_alignment = None
+    nearby_alignments = None
+
     def __init__(self, name, _id, **kwargs):
         self.name = name  # wolf or sheep
         self.id = _id
@@ -37,20 +40,40 @@ class Animal:
         self.closest_alignment = idx
         self.nearby_alignments = nearby
 
-    def update_speed_alignment(self):
+    def update_speed_alignment(self, delta_t: float):
         rnd = default_rng()
         logger.info(f"{self.id} speed 0 is  {self.speed.y}")
         raw_nearby_herd = set()
         for idx in self.nearby_alignments:
             raw_nearby_herd = set.union(raw_nearby_herd, Config.Sheep_Around.get(idx, set()))
-        nearby_herd_speed_direction = [h.speed.y for h in raw_nearby_herd
-                             if self.square_distance(h) <= Config.RADIUS_ALIGNMENT_SQUARE]
-        self.speed.y = np.mean(nearby_herd_speed_direction) + Config.ANGLE_DIRECTION * rnd.uniform(-1.0, 1)
+
+        nearby_herd = [h for h in raw_nearby_herd
+                       if self.square_distance(h) <= Config.RADIUS_ALIGNMENT_SQUARE]
+        nearby_herd_speed_direction = [h.speed.y for h in nearby_herd]
+        self.speed.y = (np.mean(nearby_herd_speed_direction)
+                        + Config.ANGLE_DIRECTION * rnd.uniform(-1.0, 1)) % (2 * math.pi)
         logger.info(f"{self.id} speed 0 is  {self.speed.y}")
 
+        repel_herd = [n for n in nearby_herd if self.id != n.id and
+                      self.square_distance(n) <= Config.RADIUS_REPEL_SQURE]
+        if len(repel_herd) == 0:
+            return
+        repel_speed = np.sum([[abs(n.pos.x - self.pos.x) / self.square_distance(n),
+                              abs(n.pos.y - self.pos.y) / self.square_distance(n)]
+                              for n in repel_herd],
+                            axis=0) * delta_t
+        logger.info(f"{self.id} repel speed is  {repel_speed}")
+        x = self.speed.x * math.sin(self.speed.y) - repel_speed[0]
+        y = self.speed.x * math.cos(self.speed.y) - repel_speed[1]
+        self.speed.x = math.sqrt(x ** 2 + y ** 2 )
+        self.speed.y = math.atan2(y, x)
+
+    def update_speed_repel(self, delta_t: float):
+        pass
+
     def update_speed(self, delta_t):
-        self.update_speed_alignment()
-        # self.update_speed_repel(delta_t)
+        self.update_speed_alignment(delta_t)
+        self.update_speed_repel(delta_t)
         # self.update_speed_chase(delta_t)
 
     def move(self, delta_t: float):
@@ -58,14 +81,6 @@ class Animal:
         self.pos.move(self.speed, delta_t)
         # logger.info(f"{self.id} moved to {self.pos.x}, {self.pos.y}")
 
-    # def calculate_align_pulse(self, herd : [], force_0: Vector) -> Vector:
-    #     nearby_herd = [ h for h in herd if self.distance(h) <= R_ALIGHNMENT ]
-    #     self.speed.x = sum( [h.speed.x for h in nearby_herd])
-    #     self.speed.y = sum( [h.speed.y for h in nearby_herd])
-    #
-    #     # close_herd =  [ h for h in herd if self.distance(h) <= RADIUS_REPEL ]
-    #     # todo
-    #     return force_0
     # def calculate_chase_escape(self, herd:[], force_0:Vector) -> Vector:
     #     close_herd =  [ h for h in herd if self.distance(h) <= R_SIGHT ]
     #     caught_herd = [ h for h in close_herd if self.distance(h) <= R_CAUGHT ]

@@ -27,8 +27,8 @@ class Grid:
         self._KDTree = spatial.KDTree(list(zip(x.ravel() * grid_size, y.ravel() * grid_size)))
         self._grid_data = self._KDTree.data
 
-    def update_pos(self, sheep_pos):
-        nearby = self._KDTree.query(sheep_pos)
+    def find_nearby_grid(self, pos):
+        nearby = self._KDTree.query(pos)
         self.nearby_points = nearby[1]
 
     def get_closest_and_nearby(self, pos: Vector, sheep_idx):

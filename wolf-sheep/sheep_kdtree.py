@@ -16,13 +16,15 @@ import matplotlib.animation as animation
 
 Sheep = []
 Wolves = []
-
+Animals = []
 
 def init():
     global particles
     util.init_animals(Sheep, Wolves)
+    Animals.extend(Wolves)
+    Animals.extend(Sheep)
     util.init_alignment_grid()
-    p = np.array([[s.pos.x, s.pos.y] for s in util.alive_animals(Sheep)])
+    p = np.array([[s.pos.x, s.pos.y] for s in Animals])
     particles.set_data(p.T)
     return particles,
 

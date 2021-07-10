@@ -78,7 +78,7 @@ class GridTestCase(unittest.TestCase):
 
     def run_case(self, grid_size, max_scope, pts, expected_close, expected_nearyby):
         grid = Grid(grid_size, max_scope)
-        grid.update_pos(pts)
+        grid.find_nearby_grid(pts)
         for idx, p in enumerate(pts):
             close, nearby = grid.get_closest_and_nearby(Vector(p[0], p[1]), idx)
             self.assertEqual(expected_close[idx], close)

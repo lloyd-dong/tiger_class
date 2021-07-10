@@ -1,6 +1,6 @@
 from typing import Dict
 import math
-
+from numpy.random import default_rng
 
 N = 30
 MAP_SCOPE = 1000
@@ -16,7 +16,8 @@ RADIUS_SIGHT_SQURE = RADIUS_SIGHT ** 2
 
 
 ANGLE_DIRECTION = math.pi/18 # +- 10 degress
-DELTA_T = 1  # set as 1 for debugging, normally should be 0.01 or less
+DELTA_T = 0.1  # set as 1 for debugging, normally should be 0.01 or less
 MAX_ITERATION = 10000
 
 Sheep_Around: Dict[int, set] = {}
+rnd = default_rng()

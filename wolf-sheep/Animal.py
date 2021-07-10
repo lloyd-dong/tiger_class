@@ -1,6 +1,6 @@
 import Config
+from Config import rnd
 import numpy as np
-from numpy.random import default_rng
 from Logger import logger
 import math
 
@@ -13,11 +13,14 @@ class Animal:
 
     def __init__(self, name, _id, **kwargs):
         self.name = name  # wolf or sheep
+        self.chaser = "sheep" if (name == "wolf") else "wolf"
+        self.chase_direction = - 1 if (name == "wolf") else 1
         self.id = _id
         self.alive = True
         self.pos = kwargs["pos"]  # this is a vector, and must have, throw exception of not set
         self.speed = kwargs.get("speed", Config.INIT_SPEED)  # this is a vector
         self.shape = kwargs.get("shape", "v")  # the marker to plot, e.g. wolf 'D', sheep '+'
+
         logger.debug(f"{self.id} is born at {self.pos.x}, {self.pos.y}")
 
     # def distance(self, other_animal):
@@ -41,7 +44,6 @@ class Animal:
         self.nearby_alignments = nearby
 
     def update_speed_alignment(self, delta_t: float):
-        rnd = default_rng()
         logger.info(f"{self.id} speed 0 is  {self.speed.y}")
         raw_nearby_herd = set()
         for idx in self.nearby_alignments:
@@ -71,10 +73,23 @@ class Animal:
     def update_speed_repel(self, delta_t: float):
         pass
 
+    def update_speed_chase(self, delta_t: float):
+        raw_chase_herd = set()
+        for idx in self.chase_grids:
+            raw_chase_herd = set.union(raw_chase_herd, Chase_Grid.get_nearyby(idx, self.chaser))
+
+        chase_herd = [h for h in raw_chase_herd
+                       if self.square_distance(h) <= Config.RADIUS_CAUGHT_SQURE]
+        chase_herd_direction = [ math.atan2(self.pos.y - h.pos.y, self.pos.x - h.pos.x)
+                                        for h in chase_herd]
+        self.speed.y += np.mean(chase_herd_direction) * self.chase_direction
+        self.speed.y =  self.speed.y % (2 * math.pi)
+        logger.info(f"{self.id} speed 0 is  {self.speed.y}")
+
     def update_speed(self, delta_t):
         self.update_speed_alignment(delta_t)
         self.update_speed_repel(delta_t)
-        # self.update_speed_chase(delta_t)
+        self.update_speed_chase(delta_t)
 
     def move(self, delta_t: float):
         self.update_speed(delta_t)

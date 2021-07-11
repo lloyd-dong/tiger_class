@@ -1,6 +1,8 @@
 import math
 
 import matplotlib.pyplot as plt
+import numpy as np
+
 import Animal
 from Vector import Vector
 import Config
@@ -12,10 +14,16 @@ def alive_animals(animals: []) -> []:
 
 def init_animals(sheep, wolves):
     rnd = Config.rnd
+    # positions = [Vector(p[0], p[1]) for p in
+    #              zip(rnd.choice(int(Config.MAP_SCOPE/Config.RADIUS_REPEL), size=2 * Config.N, replace=False)
+    #                  * Config.RADIUS_REPEL,
+    #                  rnd.uniform(0, Config.MAP_SCOPE, 2 * Config.N))]
     positions = [Vector(p[0], p[1]) for p in
-                 zip(rnd.choice(int(Config.MAP_SCOPE/Config.RADIUS_REPEL), size=2 * Config.N, replace=False)
+                 zip(rnd.choice(np.arange(Config.MAP_SCOPE/Config.RADIUS_REPEL/4,
+                                          Config.MAP_SCOPE/Config.RADIUS_REPEL/2), size=2 * Config.N, replace=False)
                      * Config.RADIUS_REPEL,
-                     rnd.uniform(0, Config.MAP_SCOPE, 2 * Config.N))]
+                     rnd.uniform(Config.MAP_SCOPE/4, Config.MAP_SCOPE/2, 2 * Config.N))]
+
     speed = [Vector(Config.INIT_SPEED, angle) for angle in rnd.uniform(- math.pi, math.pi, 2 * Config.N)]
     for i in range(Config.N):
         wolves.append(Animal.Animal("wolf", i, pos=positions[i], speed=speed[i], marker="D"))

@@ -11,7 +11,7 @@ def init_logger(logger_name="root", base_dir='', log_file_name=""):
 
     handler_Console = logging.StreamHandler()
     handler_Console.setFormatter(formatter)
-    handler_Console.setLevel(logging.INFO)
+    handler_Console.setLevel(logging.DEBUG)
 
     if not base_dir:
         base_dir = os.path.dirname(os.path.abspath(__file__))

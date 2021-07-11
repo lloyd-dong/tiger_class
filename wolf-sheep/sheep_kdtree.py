@@ -64,18 +64,34 @@ def main():
 
 
 def _debug():
-    global fig, ax, sheep_points, Animals, Alignment_Grid, Chase_Grid
-    fig = plt.figure()
-    ax = fig.add_subplot(111, xlim=(0, Config.MAP_SCOPE), ylim=(0, Config.MAP_SCOPE))
-    sheep_points, = ax.plot([], [], '+', ms=6)
+    global fig, ax, sheep_points, wolf_points, Animals, Alignment_Grid, Chase_Grid
+    with plt.ion():
+        fig = plt.figure()
+        ax = fig.add_subplot(111, xlim=(0, Config.MAP_SCOPE), ylim=(0, Config.MAP_SCOPE))
+        sheep_points, = ax.plot([], [], '+', ms=4)
+        wolf_points, = ax.plot([], [], 'D', ms=4)
+        init()
+        plt.draw()
+        plt.pause(1)
 
-    init()
-    for _ in range(Config.PACE):
-        Alignment_Grid.update_index(Animals)
-        Chase_Grid.update_index(Animals)
-        for a in Animals:
-            a.move(Config.DELTA_T, Alignment_Grid, Chase_Grid)
-        Animals = util.alive_animals(Animals)
+        for _ in range(100):
+            for _ in range(Config.PACE):
+                Alignment_Grid.update_index(Animals)
+                Chase_Grid.update_index(Animals)
+                for a in Animals:
+                    a.move(Config.DELTA_T, Alignment_Grid, Chase_Grid)
+                Animals = util.alive_animals(Animals)
+
+            shp = np.array([[s.pos.x, s.pos.y] for s in Animals if s.type == "sheep"])
+            sheep_points.set_data(shp.T)
+            wlv = np.array([[s.pos.x, s.pos.y] for s in Animals if s.type == "wolf"])
+            wolf_points.set_data(wlv.T)
+            plt.draw()
+            plt.pause(0.2)
+
+
+
 
 if __name__ == "__main__":
-    main()
+    # main()
+    _debug()

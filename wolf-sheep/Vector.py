@@ -26,5 +26,5 @@ class Vector:
     def move(self, speed, delta_t: float) -> None:  # speed is also a vector
         # self.x = (self.x + speed.x * delta_t) % self.max_scope  # periodic boundary
         # self.y = (self.y + speed.y * delta_t) % self.max_scope  # periodic boundary
-        self.x = (self.x + speed.x * sin(speed.y) * delta_t) % self.max_scope  # periodic boundary
-        self.y = (self.y + speed.y * cos(speed.y) * delta_t) % self.max_scope  # periodic boundary
+        self.x = (self.x + speed.x * cos(speed.y) * delta_t) % self.max_scope  # periodic boundary
+        self.y = (self.y + speed.x * sin(speed.y) * delta_t) % self.max_scope  # periodic boundary

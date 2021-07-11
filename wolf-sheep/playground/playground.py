@@ -36,7 +36,7 @@ def poc():
 rnd = default_rng()
 
 def once_lambda(points):
-    row = points.shape[0]
+    row = points.marker[0]
     # dm = pdist(points, lambda p1, p2: np.sum(
     #     min( (p1[0] - p2[0])**2, (pm - abs(p1[1] - p2[1])) **2 ),
     #     np.amin([(p1 - p2) ** 2, (pm - np.abs(p1 - p2)) ** 2], axis=0))

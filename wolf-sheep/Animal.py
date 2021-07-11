@@ -1,122 +1,102 @@
-import Config
-from Config import rnd
 import numpy as np
 from Logger import logger
 import math
-
-Distance_Map = {}
+import Grid
+import Config
 
 
 class Animal:
-    closest_alignment = None
-    nearby_alignments = None
+    Distance_Map = {}
 
-    def __init__(self, name, _id, **kwargs):
-        self.name = name  # wolf or sheep
-        self.chaser = "sheep" if (name == "wolf") else "wolf"
-        self.chase_direction = - 1 if (name == "wolf") else 1
-        self.id = _id
-        self.alive = True
+    def __init__(self, ani_type: str, _id: int, **kwargs):
+        self.type: str = ani_type  # wolf or sheep
+        self.chaser: str = "sheep" if (ani_type == "wolf") else "wolf"
+        self.chase_direction: int = - 1 if (ani_type == "wolf") else 1
+        self.id: int = _id
+        self.alive: bool = True
         self.pos = kwargs["pos"]  # this is a vector, and must have, throw exception of not set
         self.speed = kwargs.get("speed", Config.INIT_SPEED)  # this is a vector
-        self.shape = kwargs.get("shape", "v")  # the marker to plot, e.g. wolf 'D', sheep '+'
-
+        self.marker: str = kwargs.get("marker", "v")  # the marker to plot, e.g. wolf 'D', sheep '+'
+        self.align_grid: Grid.Grid = None
+        self.chase_grid: Grid.Grid = None
         logger.debug(f"{self.id} is born at {self.pos.x}, {self.pos.y}")
-
-    # def distance(self, other_animal):
-    #     return sqrt(self.square_distance(other_animal))
 
     def square_distance(self, other):
         if self.id == other.id:
             return 0
         key = (min(self.id, other.id), max(self.id, other.id))
-        if key not in Distance_Map:
-            Distance_Map[key] = self.pos.square_distance(other.pos)
-        return Distance_Map[key]
+        if key not in Animal.Distance_Map:
+            Animal.Distance_Map[key] = self.pos.square_distance(other.pos)
+        return Animal.Distance_Map[key]
 
-    def set_alignment_points(self, idx: int, nearby: set):
-        """
-
-        :param idx: int
-        :type nearby: set of idx of alignment grid
-        """
-        self.closest_alignment = idx
-        self.nearby_alignments = nearby
-
-    def update_speed_alignment(self, delta_t: float):
+    def update_speed_alignment_repel(self, delta_t: float):
         logger.info(f"{self.id} speed 0 is  {self.speed.y}")
+        nearby_grids = self.align_grid.get_nearby_grids(self.id)
         raw_nearby_herd = set()
-        for idx in self.nearby_alignments:
-            raw_nearby_herd = set.union(raw_nearby_herd, Config.Sheep_Around.get(idx, set()))
-
+        for idx in nearby_grids:
+            raw_nearby_herd = set.union(raw_nearby_herd, self.align_grid.get_animals_neary(idx, self.type))
         nearby_herd = [h for h in raw_nearby_herd
-                       if self.square_distance(h) <= Config.RADIUS_ALIGNMENT_SQUARE]
+                       if h.alive and self.square_distance(h) <= Config.RADIUS_ALIGNMENT_SQUARE]
+        if len(nearby_herd) == 0:
+            return
         nearby_herd_speed_direction = [h.speed.y for h in nearby_herd]
         self.speed.y = (np.mean(nearby_herd_speed_direction)
-                        + Config.ANGLE_DIRECTION * rnd.uniform(-1.0, 1)) % (2 * math.pi)
-        logger.info(f"{self.id} speed 0 is  {self.speed.y}")
+                        + Config.ANGLE_DIRECTION * Config.rnd.uniform(-1.0, 1)) % math.pi
+        logger.info(f"{self.id} speed alignment is  {self.speed.y}")
+        self.update_speed_repel(nearby_herd, delta_t)
 
+    def update_speed_repel(self, nearby_herd, delta_t: float):
         repel_herd = [n for n in nearby_herd if self.id != n.id and
                       self.square_distance(n) <= Config.RADIUS_REPEL_SQURE]
         if len(repel_herd) == 0:
             return
         repel_speed = np.sum([[abs(n.pos.x - self.pos.x) / self.square_distance(n),
-                              abs(n.pos.y - self.pos.y) / self.square_distance(n)]
+                               abs(n.pos.y - self.pos.y) / self.square_distance(n)]
                               for n in repel_herd],
-                            axis=0) * delta_t
+                             axis=0) \
+                      * delta_t * Config.Beta
         logger.info(f"{self.id} repel speed is  {repel_speed}")
         x = self.speed.x * math.sin(self.speed.y) - repel_speed[0]
         y = self.speed.x * math.cos(self.speed.y) - repel_speed[1]
-        self.speed.x = math.sqrt(x ** 2 + y ** 2 )
+        self.speed.x = math.sqrt(x ** 2 + y ** 2)
         self.speed.y = math.atan2(y, x)
 
-    def update_speed_repel(self, delta_t: float):
-        pass
-
-    def update_speed_chase(self, delta_t: float):
+    def update_speed_chase(self):
         raw_chase_herd = set()
-        for idx in self.chase_grids:
-            raw_chase_herd = set.union(raw_chase_herd, Chase_Grid.get_nearyby(idx, self.chaser))
+        nearby_grids = self.chase_grid.get_nearby_grids(self.id)
+        for idx in nearby_grids:
+            raw_chase_herd = set.union(raw_chase_herd, self.chase_grid.get_animals_neary(idx, self.chaser))
 
         chase_herd = [h for h in raw_chase_herd
-                       if self.square_distance(h) <= Config.RADIUS_CAUGHT_SQURE]
-        chase_herd_direction = [ math.atan2(self.pos.y - h.pos.y, self.pos.x - h.pos.x)
-                                        for h in chase_herd]
+                      if h.alive and self.square_distance(h) <= Config.RADIUS_SIGHT_SQURE]
+        caught_events = [c for c in chase_herd if self.square_distance(c) <= Config.RADIUS_CAUGHT_SQURE]
+        if len(caught_events) > 0:
+            if self.type == "sheep":
+                self.alive = False
+                logger.info(f"{self.id} is dead")
+                return
+            else:
+                for s in caught_events:
+                    s.alive = False
+                    chase_herd.remove(s)
+                    logger.info(f"{s.id} is dead")
+        if len(chase_herd) == 0:
+            return
+        chase_herd_direction = [math.atan2(self.pos.y - h.pos.y, self.pos.x - h.pos.x)
+                                for h in chase_herd]
         self.speed.y += np.mean(chase_herd_direction) * self.chase_direction
-        self.speed.y =  self.speed.y % (2 * math.pi)
-        logger.info(f"{self.id} speed 0 is  {self.speed.y}")
+        self.speed.y = self.speed.y % math.pi
+        logger.info(f"{self.id} chase speed is {self.speed.y}")
 
-    def update_speed(self, delta_t):
-        self.update_speed_alignment(delta_t)
-        self.update_speed_repel(delta_t)
-        self.update_speed_chase(delta_t)
+    def update_speed(self, delta_t, ):
+        self.update_speed_alignment_repel(delta_t)
+        self.update_speed_chase()
 
-    def move(self, delta_t: float):
+    def move(self, delta_t: float, align_grid: Grid.Grid, chase_grid: Grid.Grid):
+        if not self.alive:
+            return
+        self.align_grid = align_grid
+        self.chase_grid = chase_grid
         self.update_speed(delta_t)
         self.pos.move(self.speed, delta_t)
-        # logger.info(f"{self.id} moved to {self.pos.x}, {self.pos.y}")
-
-    # def calculate_chase_escape(self, herd:[], force_0:Vector) -> Vector:
-    #     close_herd =  [ h for h in herd if self.distance(h) <= R_SIGHT ]
-    #     caught_herd = [ h for h in close_herd if self.distance(h) <= R_CAUGHT ]
-    #     if ( len(caught_herd) >0 ):
-    #         if (self.name == "sheep"):
-    #             self.alive = False
-    #             print(f"sheep-{self.id} is dead")
-    #             return Vector(0,0)
-    #         else:
-    #             for h in caught_herd:
-    #                 h.alive = False
-    #                 print(f"sheep-{h.id} is dead")
-    #             close_herd = list(set(close_herd) - set(caught_herd))
-    #     #todo
-    #     return force_0
-    #
-    # def calculate_force(self, herd : [], force_0: Vector) -> Vector:
-    #     if (self.name == herd[0].name) :
-    #         return self.calculate_align_pulse( herd, force_0)
-    #     else:
-    #         force = self.calculate_chase_escape( herd, force_0)
-    #         if (self.name == "sheep"):
-    #             force.inverse()
-    #     return force
+        # logger.debug(f"{self.id} moved to {self.pos.x}, {self.pos.y}")

@@ -62,7 +62,7 @@ class Grid:
                 else idx % self._row
             idx_1 = c * self._row + r
             self.index_a2g[ani.id] = idx_1
-            if (idx_1, ani.type) in self.index_g2a.keys():
+            if (idx_1, ani.type) in self.index_g2a:
                 self.index_g2a[(idx_1, ani.type)].add(ani)
             else:
                 self.index_g2a[(idx_1, ani.type)] = {ani}

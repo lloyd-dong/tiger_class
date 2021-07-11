@@ -2,7 +2,7 @@ from typing import Dict
 import math
 from numpy.random import default_rng
 
-N = 30
+N = 10
 Beta = 10
 Gamma = 10
 MAP_SCOPE = 1000

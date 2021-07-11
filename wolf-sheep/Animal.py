@@ -30,7 +30,7 @@ class Animal:
         return Animal.Distance_Map[key]
 
     def update_speed_alignment_repel(self, delta_t: float):
-        logger.info(f"{self.id} speed 0 is  {self.speed.y}")
+        logger.debug(f"{self.id} speed 0 is  {self.speed.y}")
         nearby_grids = self.align_grid.get_nearby_grids(self.id)
         raw_nearby_herd = set()
         for idx in nearby_grids:
@@ -42,7 +42,7 @@ class Animal:
         nearby_herd_speed_direction = [h.speed.y for h in nearby_herd]
         self.speed.y = (np.mean(nearby_herd_speed_direction)
                         + Config.ANGLE_DIRECTION * Config.rnd.uniform(-1.0, 1)) % math.pi
-        logger.info(f"{self.id} speed alignment is  {self.speed.y}")
+        logger.debug(f"{self.id} speed alignment is  {self.speed.y}")
         self.update_speed_repel(nearby_herd, delta_t)
 
     def update_speed_repel(self, nearby_herd, delta_t: float):
@@ -86,7 +86,7 @@ class Animal:
                                 for h in chase_herd]
         self.speed.y += np.mean(chase_herd_direction) * self.chase_direction
         self.speed.y = self.speed.y % math.pi
-        logger.info(f"{self.id} chase speed is {self.speed.y}")
+        logger.debug(f"{self.id} chase speed is {self.speed.y}")
 
     def update_speed(self, delta_t, ):
         self.update_speed_alignment_repel(delta_t)
